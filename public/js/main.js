@@ -1,8 +1,12 @@
 const btn1 = document.getElementById("btn_generar");
 const arbol = document.getElementById("contenido_arbol");
+const resultadoInorden = document.getElementById("resultado_inorden");
+const resultadoPreorden = document.getElementById("resultado_preorden");
+const resultadoPosorden = document.getElementById("resultado_posorden");
+
 
 const estilos = {
-    color: '#00f2ff',
+    color: 'deepskyblue',
     outline: false,
     endPlugOutline: false,
     endPlugSize: 1,
@@ -11,6 +15,31 @@ const estilos = {
 };
 
 let lineas = [];
+
+function inorden(node) {
+    if (!node) return "";
+    if (!node.left && !node.right) {
+        return node.value;
+    }
+
+    const left = inorden(node.left);
+    const right = inorden(node.right);
+    return `( ${left} ${node.value} ${right} )`;
+}
+
+function preorden(node) {
+    if (!node) return "";
+    const left = preorden(node.left);
+    const right = preorden(node.right);
+    return `${node.value} ${left} ${right}`.trim();
+}
+
+function posorden(node) {
+    if (!node) return "";
+    const left = posorden(node.left);
+    const right = posorden(node.right);
+    return `${left} ${right} ${node.value}`.trim();
+}
 
 function parseExpression(expresion) {
     expresion = expresion.replace(/\s+/g, '');
@@ -23,10 +52,10 @@ function parseExpression(expresion) {
     let pos = -1;
     let depth = 0;
 
-    for (let i = 0; i < expresion.length; i++) {
+    for (let i = expresion.length - 1; i >= 0; i--) {
         const char = expresion[i];
-        if (char === '(') depth++;
-        else if (char === ')') depth--;
+        if (char === ')') depth++;
+        else if (char === '(') depth--;
         else if (precedence[char] && depth === 0) {
             if (precedence[char] <= minPrecedence) {
                 minPrecedence = precedence[char];
@@ -42,7 +71,7 @@ function parseExpression(expresion) {
             right: parseExpression(expresion.slice(pos + 1))
         };
     }
-
+    
     return { value: expresion };
 }
 
@@ -56,25 +85,28 @@ function matchingParen(expresion, start) {
     return -1;
 }
 
-function renderTree(node, level = 0, index = "root") {
-    if (!node) return '';
+function renderTree(node, index = "root") {
+    if (!node || !node.value) return '';
 
     const id = `node-${index}`;
+    const operadores = ['+', '-', '*', '/'];
+    const esOperando = !operadores.includes(node.value);
+
     const html = `
         <div class="tree-node text-center" 
              id="${id}" 
              style="
-                position: relative;
-                display: inline-block;
-                margin: 20px;
+               position: relative;
+               display: inline-block;
+               margin: 20px;
              ">
-            <button class="btn ${isNaN(node.value) ? 'btn-primary' : 'btn-success'} rounded-circle" 
-                    style="width: 50px; height: 50px;">
+            <button class="btn ${esOperando ? 'btn-success' : 'btn-primary'} rounded-circle" 
+                    style="width: 50px; height: 50px; font-size: 1.2rem;">
                 ${node.value}
             </button>
             <div class="tree-children d-flex justify-content-center" style="margin-top: 40px;">
-                ${node.left ? renderTree(node.left, level + 1, index + "L") : ''}
-                ${node.right ? renderTree(node.right, level + 1, index + "R") : ''}
+                ${node.left ? renderTree(node.left, index + "L") : ''}
+                ${node.right ? renderTree(node.right, index + "R") : ''}
             </div>
         </div>
     `;
@@ -86,7 +118,7 @@ function conectarNodos(node, index = "root") {
 
     const parentId = `node-${index}`;
 
-    if (node.left) {
+    if (node.left && node.left.value) {
         const leftId = `node-${index}L`;
         const parent = document.getElementById(parentId).querySelector("button");
         const child = document.getElementById(leftId).querySelector("button");
@@ -94,7 +126,7 @@ function conectarNodos(node, index = "root") {
         conectarNodos(node.left, index + "L");
     }
 
-    if (node.right) {
+    if (node.right && node.right.value) {
         const rightId = `node-${index}R`;
         const parent = document.getElementById(parentId).querySelector("button");
         const child = document.getElementById(rightId).querySelector("button");
@@ -105,13 +137,30 @@ function conectarNodos(node, index = "root") {
 
 btn1.addEventListener("click", function () {
     const expresion = document.getElementById("expresion").value;
-    if (!/^[0-9+\-*/() ]+$/.test(expresion)) {
-        alert("Expresión no válida. Usa solo números, +, -, *, / y paréntesis.");
+    
+    if (!/^[a-zA-Z0-9+\-*/() ]+$/.test(expresion) || expresion.trim() === "") {
+        alert("Expresión no válida. Usa solo letras, números, +, -, *, / y paréntesis.");
         return;
     }
+    
     lineas.forEach(l => l.remove());
     lineas = [];
-    const tree = parseExpression(expresion);
-    arbol.innerHTML = renderTree(tree);
-    setTimeout(() => conectarNodos(tree), 200);
+    resultadoInorden.textContent = "";
+    resultadoPreorden.textContent = "";
+    resultadoPosorden.textContent = "";
+
+    try {
+        const tree = parseExpression(expresion);
+        arbol.innerHTML = renderTree(tree);
+    
+        resultadoInorden.textContent = inorden(tree);
+        resultadoPreorden.textContent = preorden(tree);
+        resultadoPosorden.textContent = posorden(tree);
+        
+        setTimeout(() => conectarNodos(tree), 100);
+
+    } catch (error) {
+        alert("Error al parsear la expresión. Verifique que esté bien formada.");
+        console.error(error);
+    }
 });

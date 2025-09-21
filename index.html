@@ -10,26 +10,45 @@
     <title>arbol de expresion</title>
 </head>
 <body>
-    <div class="conteiner">
+    <div class="container">
         <div class="row justify-content-around">
             <div class="col text-center">
                 <h1 class="text-primary">Arbol de expresiones</h1>
                 <hr>
             </div>
-            <hr>
+        </div>
+
+        <div class="row justify-content-around align-items-start">
             <div class="col-md-4">
-                <label class="mt-2" for="expresion">Ingrese una operación matemática simple</label>
-                <input type="text" class="form-control mt-2" id="expresion">
+                <label class="mt-2" for="expresion">Ingrese una operación matemática</label>
+                <input type="text" class="form-control mt-2" id="expresion" placeholder="(A+B)*C">
                 <button id="btn_generar" class="btn btn-primary w-100 mt-2">Generar arbol</button>
             </div>
-            <hr>
-            <div class="col-10 mt-2">
-                <div id="contenido_arbol" class="d-flex flex-column align-items-center border border-primary p-4" style="min-height: 200px; position: relative;">
+
+            <div class="col-md-7">
+                <div class="border rounded p-3 mt-2">
+                    <h5 class="text-secondary">Recorridos del Árbol</h5>
+                    <hr>
+                    <p><strong>Inorden (In-order):</strong></p>
+                    <pre><code id="resultado_inorden" class="text-success fw-bold"></code></pre>
+                    
+                    <p><strong>Preorden (Pre-order):</strong></p>
+                    <pre><code id="resultado_preorden" class="text-success fw-bold"></code></pre>
+                    
+                    <p><strong>Posorden (Post-order):</strong></p>
+                    <pre><code id="resultado_posorden" class="text-success fw-bold"></code></pre>
+                </div>
+            </div>
+        </div>
+        <hr>
+        <div class="row justify-content-center">
+            <div class="col-12 mt-2">
+                <div id="contenido_arbol" class="d-flex flex-column align-items-center border border-primary p-4" style="min-height: 200px; position: relative; overflow: auto;">
                     
                 </div>
             </div>
-
         </div>
+
     </div>
 
     <script src="public/js/main.js"></script>
